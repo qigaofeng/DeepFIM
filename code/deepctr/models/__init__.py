@@ -10,8 +10,8 @@ from .pnn import PNN
 from .wdl import WDL
 from .xdeepfm import xDeepFM
 from .autoint import AutoInt
-from .fnfm import FNFM
+from .deepfim import DeepFIM
 
 
 __all__ = ["AFM", "DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "FNFM"]
+           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "DeepFIM"]
