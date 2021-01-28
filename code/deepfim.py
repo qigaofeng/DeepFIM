@@ -9,7 +9,9 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
-import deepctr
+
+import src
+from src.model.deepfim import DeepFIM
 from tensorflow.python.keras.optimizers import Adam,Adagrad
 
 
@@ -26,7 +28,7 @@ target = ['click']
 # In[4]:
 
 
-sparse_feature_list = [deepctr.SingleFeat(name,dim) for name,dim in feature_count.items()]
+sparse_feature_list = [src.SingleFeat(name,dim) for name,dim in feature_count.items()]
 
 
 # In[5]:
@@ -36,11 +38,8 @@ sparse_feature_list = [deepctr.SingleFeat(name,dim) for name,dim in feature_coun
 from tensorflow.python.keras.optimizers import Adam,Adagrad
 from tensorflow.python.keras.callbacks import EarlyStopping
 
-model = deepctr.models.DeepFIM({'sparse':sparse_feature_list,'dense':[]},hidden_size=(256,256,),embedding_size=4,reduce_sum=False,include_linear=True,use_bn=True)
+model = DeepFIM({'sparse':sparse_feature_list,'dense':[]})
 model.compile('adam','binary_crossentropy',metrics=['binary_crossentropy'],)
-
-
-TEST_BATCH_SIZE = 2**15
 
 count = -1
 hist = model.fit([train[feat.name] for feat in sparse_feature_list],train[target].values,batch_size=4096,epochs=10,initial_epoch=0,validation_data=([val[feat.name] for feat in sparse_feature_list],val[target].values),verbose=1)
