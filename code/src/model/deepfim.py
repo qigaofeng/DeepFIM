@@ -203,7 +203,7 @@ def DeepFIM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     :param reduce_sum: bool,whether apply reduce_sum on cross vector
     :return: A Keras model instance.
     """
-    global ffm_out, fim_out, final_logit
+    global fim_out, final_logit
     check_feature_config_dict(feature_dim_dict)
     if 'sequence' in feature_dim_dict and len(feature_dim_dict['sequence']) > 0:
         raise ValueError("now sequence input is not supported in NFFM")
