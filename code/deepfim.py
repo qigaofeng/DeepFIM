@@ -1,22 +1,12 @@
 
 # coding: utf-8
 
-# In[1]:
-
-
 import pandas as pd
-import numpy as np
-from tqdm import tqdm
-from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
-
 import src
 from src.model.deepfim import DeepFIM
 from tensorflow.python.keras.optimizers import Adam,Adagrad
-
-
-# In[2]:
-
+from tensorflow.python.keras.optimizers import Adam,Adagrad
+from tensorflow.python.keras.callbacks import EarlyStopping
 
 train = pd.read_pickle('../avazu/enc_train.pkl')
 val = pd.read_pickle('../avazu/enc_val.pkl')
@@ -24,19 +14,7 @@ feature_count = pd.read_pickle('../avazu/feature_dic.pkl')
 target = ['click']
 #feature_count.pop('userID')
 
-
-# In[4]:
-
-
 sparse_feature_list = [src.SingleFeat(name,dim) for name,dim in feature_count.items()]
-
-
-# In[5]:
-
-
-
-from tensorflow.python.keras.optimizers import Adam,Adagrad
-from tensorflow.python.keras.callbacks import EarlyStopping
 
 model = DeepFIM({'sparse':sparse_feature_list,'dense':[]})
 model.compile('adam','binary_crossentropy',metrics=['binary_crossentropy'],)
