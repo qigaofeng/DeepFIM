@@ -11,17 +11,19 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
 from src.input_embedding import (create_singlefeat_inputdict,
-                                     get_embedding_vec_list, get_inputs_list,
-                                     get_linear_logit)
+                                 get_embedding_vec_list, get_inputs_list,
+                                 get_linear_logit)
 from src.layers.core import MLP, PredictionLayer
 from src.utils import check_feature_config_dict
 from tensorflow.python.keras.layers import Layer, Concatenate
+
 
 def concat_fun(inputs, axis=-1):
     if len(inputs) == 1:
         return inputs[0]
     else:
         return Concatenate(axis=axis)(inputs)
+
 
 class ATT(Layer):
     """
@@ -86,7 +88,6 @@ class ATT(Layer):
             attention_output, self.projection_p, axes=(-1, 0))
         return attention_output
 
-
     def compute_output_shape(self, input_shape):
         if not isinstance(input_shape, list):
             raise ValueError('A `AFMLayer` layer should be called '
@@ -138,7 +139,6 @@ class INT(Layer):
                                               self.attention_factor), initializer=glorot_normal(seed=self.seed),
                                        regularizer=l2(self.l2_reg_w), name="attention_W")
 
-
         # Be sure to call this somewhere!
         super(INT, self).build(input_shape)
 
@@ -152,7 +152,6 @@ class INT(Layer):
 
         bi_interaction = []
         for r, c in itertools.combinations(range(len(embeds_vec_list)), 2):
-
             field_score = tf.reduce_sum(self.filed_W[r] * self.filed_W[c])
 
             embed = embeds_vec_list[r] * embeds_vec_list[c]
@@ -161,7 +160,6 @@ class INT(Layer):
         out = concat_fun(bi_interaction, axis=1)
 
         return out
-
 
     def compute_output_shape(self, input_shape):
 
@@ -183,9 +181,9 @@ class INT(Layer):
 
 
 def DeepFIM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
-         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
-         init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
-         pooling_method=True, att_factor=4):
+            l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
+            init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
+            pooling_method=True, keep_prob=1, att_factor=4):
     """Instantiates the Field-aware Neural Factorization Machine architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -247,14 +245,14 @@ def DeepFIM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
                 element_wise_prod = Lambda(lambda element_wise_prod: K.sum(element_wise_prod, axis=-1))(
                     element_wise_prod)
             Intra_embed_list.append(element_wise_prod)
-    Intra_embed_list = concat_fun(Intra_embed_list,axis=1)
+    Intra_embed_list = concat_fun(Intra_embed_list, axis=1)
 
     # fim layer
     fim = Inter_embed_list * Intra_embed_list
 
     # attention layer
     if pooling_method == 'att':
-        fim_out = ATT(att_factor)(fim)
+        fim_out = ATT(att_factor, keep_prob)(fim)
     else:
         print("error!")
 
@@ -282,14 +280,14 @@ def DeepFIM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
 def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
     # Inter-field
     Inter_sparse_embedding = {j.name: {feat.name: Embedding(j.dimension, embedding_size,
-                                                      embeddings_initializer=RandomNormal(
-                                                          mean=0.0, stddev=0.0001, seed=seed),
-                                                      embeddings_regularizer=l2(
-                                                          l2_rev_V),
-                                                      name='sparse_emb_' + str(j.name) + '_' + str(
-                                                          i) + '-' + feat.name) for i, feat in
-                                 enumerate(feature_dim_dict["sparse"] + feature_dim_dict['dense'])} for j in
-                        feature_dim_dict["sparse"]}
+                                                            embeddings_initializer=RandomNormal(
+                                                                mean=0.0, stddev=0.0001, seed=seed),
+                                                            embeddings_regularizer=l2(
+                                                                l2_rev_V),
+                                                            name='sparse_emb_' + str(j.name) + '_' + str(
+                                                                i) + '-' + feat.name) for i, feat in
+                                       enumerate(feature_dim_dict["sparse"] + feature_dim_dict['dense'])} for j in
+                              feature_dim_dict["sparse"]}
 
     Inter_dense_embedding = {
         j.name: {feat.name: Dense(embedding_size, kernel_initializer=RandomNormal(mean=0.0, stddev=0.0001,
@@ -297,22 +295,22 @@ def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l
                                   kernel_regularizer=l2(l2_rev_V), name='sparse_emb_' + str(j.name) + '_' + str(
                 i) + '-' + feat.name) for i, feat in
                  enumerate(feature_dim_dict["sparse"] + feature_dim_dict["dense"])} for j in
-    feature_dim_dict["dense"]}
+        feature_dim_dict["dense"]}
 
     # Inter-field
     Intra_sparse_embedding = {j.name: Embedding(j.dimension, embedding_size,
-                                          embeddings_initializer=RandomNormal(
-                                              mean=0.0, stddev=0.0001, seed=seed),
-                                          embeddings_regularizer=l2(
-                                              l2_rev_V),
-                                          name='sparse_emb_' + str(j.name) + '_' + '-' + j.name) for j in
-                        feature_dim_dict["sparse"]}
+                                                embeddings_initializer=RandomNormal(
+                                                    mean=0.0, stddev=0.0001, seed=seed),
+                                                embeddings_regularizer=l2(
+                                                    l2_rev_V),
+                                                name='sparse_emb_' + str(j.name) + '_' + '-' + j.name) for j in
+                              feature_dim_dict["sparse"]}
 
     Intra_dense_embedding = {j.name: Dense(embedding_size, kernel_initializer=RandomNormal(mean=0.0, stddev=0.0001,
-                                                                                     seed=seed), use_bias=False,
-                                     kernel_regularizer=l2(l2_rev_V), name='dense_emb_' + str(j.name) + '_' + str(
+                                                                                           seed=seed), use_bias=False,
+                                           kernel_regularizer=l2(l2_rev_V), name='dense_emb_' + str(j.name) + '_' + str(
             j)) for j in
-                       feature_dim_dict["dense"]}
+                             feature_dim_dict["dense"]}
     # linear part
     linear_embedding = {feat.name: Embedding(feat.dimension, 1,
                                              embeddings_initializer=RandomNormal(
@@ -323,4 +321,4 @@ def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l
                         i, feat in enumerate(feature_dim_dict["sparse"])}
 
     return Inter_sparse_embedding, Inter_dense_embedding, \
-           Intra_sparse_embedding,Intra_dense_embedding,linear_embedding
+           Intra_sparse_embedding, Intra_dense_embedding, linear_embedding
