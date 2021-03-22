@@ -13,4 +13,6 @@ The code has been tested running under Python 3.6.9, with the following packages
 
 •numpy==1.17.3
 
+•pandas==0.20.3
+
 •scikit-learn==0.21.3
