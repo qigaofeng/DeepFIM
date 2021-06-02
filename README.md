@@ -7,7 +7,7 @@ This repository is the implementation of DeepFIM :
 
 # Required packages
 
-The code has been tested running under Python 3.6.9, with the following packages installed (along with their dependencies):
+The code has been tested running under Python 3.5, with the following packages installed (along with their dependencies):
 
 •tensorflow==1.13.1
 
