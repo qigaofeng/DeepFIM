@@ -9,10 +9,10 @@ This repository is the implementation of DeepFIM :
 
 The code has been tested running under Python 3.6.9, with the following packages installed (along with their dependencies):
 
-•tensorflow==1.5.0
+•tensorflow==1.13.1
 
-•numpy==1.17.3
+•numpy==1.18.5
 
-•pandas==0.20.3
+•pandas==1.17.3
 
-•scikit-learn==0.21.3
+•scikit-learn==0.22.2
