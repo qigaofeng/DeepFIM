@@ -184,7 +184,7 @@ def DeepFIM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
             l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
             init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
             pooling_method=True, keep_prob=1, att_factor=4):
-    """Instantiates the Field-aware Neural Factorization Machine architecture.
+    """
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
